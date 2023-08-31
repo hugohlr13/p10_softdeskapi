@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from .models import User
 from .serializers import UserSerializer
 
@@ -19,3 +20,8 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
     
+    @action(detail=True, methods=['DELETE'], url_path='delete-account')
+    def delete_account(self, request, pk=None):
+        user = self.get_object()
+        user.delete()  # Supprime l'utilisateur et toutes ses données associées
+        return Response({'status': 'Compte supprimé'}, status=status.HTTP_200_OK)
