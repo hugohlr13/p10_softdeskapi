@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied
 from contributors.models import Contributor
+from api.models import Issue
 
 
 class ProjectPermission(permissions.BasePermission):
@@ -11,8 +12,6 @@ class ProjectPermission(permissions.BasePermission):
         return obj.author_user_id == request.user
 
 
-from rest_framework.exceptions import PermissionDenied
-
 class IssuePermission(permissions.BasePermission):
 
     def _is_contributor(self, user, project):
@@ -20,9 +19,13 @@ class IssuePermission(permissions.BasePermission):
         return Contributor.objects.filter(user_id=user.id, project_id=project.id).exists()
 
     def has_object_permission(self, request, view, obj):
-        # Imprimer les IDs pour le débogage
+        # Imprimer les IDs pour le débug
         assignee_id = obj.assignee_user_id.id if obj.assignee_user_id else "No assignee"
         print(f"User ID: {request.user.id}, Author ID: {obj.author_user_id.id}, Assignee ID: {assignee_id}")
+
+        # Si l'utilisateur est contributeur du projet, il peut voir les issues
+        if request.method in permissions.SAFE_METHODS:
+            return self._is_contributor(request.user, obj.project_id) or obj.author_user_id == request.user or obj.assignee_user_id == request.user
 
         # Si la méthode est PATCH et l'utilisateur n'est pas un contributeur
         if request.method == "PATCH" and not self._is_contributor(request.user, obj.project_id):
@@ -45,8 +48,31 @@ class IssuePermission(permissions.BasePermission):
 
 
 class CommentPermission(permissions.BasePermission):
+    def _is_contributor(self, user, project):
+        """Vérifie si l'utilisateur est un contributeur du projet."""
+        return Contributor.objects.filter(user_id=user.id, project_id=project.id).exists()
+
     def has_object_permission(self, request, view, obj):
+        # Si l'utilisateur est contributeur du projet, il peut voir les commentaires
         if request.method in permissions.SAFE_METHODS:
-            return obj.issue_id.author_user_id == request.user
-        
-        return obj.author_user_id == request.user
+            return self._is_contributor(request.user, obj.issue_id.project_id)
+
+        # Seul l'auteur peut modifier ou supprimer le commentaire
+        if obj.author_user_id == request.user:
+            return True
+
+        return False
+
+    def has_permission(self, request, view):
+        # Si la méthode est POST, vérifiez si l'utilisateur est un contributeur de l'issue associée
+        if request.method == 'POST':
+            issue_id = request.data.get('issue_id', None)
+            try:
+                issue = Issue.objects.get(id=issue_id)
+            except Issue.DoesNotExist:
+                raise PermissionDenied("Issue associée n'existe pas.")
+
+            if not self._is_contributor(request.user, issue.project_id):
+                raise PermissionDenied("Vous devez être un contributeur du projet pour commenter cette issue.")
+
+        return True

@@ -14,3 +14,12 @@ class ContributorViewSet(viewsets.ModelViewSet):
             serializer.save()
         else:
             raise PermissionDenied("Vous devez être l'auteur du projet pour ajouter des contributeurs.")
+        
+    def get_queryset(self):
+        queryset = Contributor.objects.all()
+        project_id = self.request.query_params.get('project_id', None)
+
+        if project_id is not None:
+            queryset = queryset.filter(project_id=project_id)
+
+        return queryset
