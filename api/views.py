@@ -8,7 +8,7 @@ from .permissions import ProjectPermission, IssuePermission, CommentPermission
 from contributors.models import Contributor
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
+    queryset = Project.objects.all().order_by('id')
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated, ProjectPermission]
 
@@ -17,7 +17,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 
 class IssueViewSet(viewsets.ModelViewSet):
-    queryset = Issue.objects.all()
+    queryset = Issue.objects.all().order_by('id')
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated, IssuePermission]
 
@@ -38,7 +38,7 @@ class IssueViewSet(viewsets.ModelViewSet):
         serializer.save(author_user_id=author)
 
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().order_by('id')
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, CommentPermission]
 
