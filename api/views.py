@@ -1,14 +1,17 @@
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, viewsets
 from rest_framework.exceptions import PermissionDenied
-from .models import Project, Issue, Comment
-from .serializers import ProjectSerializer, IssueSerializer, CommentSerializer
-from .permissions import ProjectPermission, IssuePermission, CommentPermission
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
 from contributors.models import Contributor
 
+from .models import Comment, Issue, Project
+from .permissions import CommentPermission, IssuePermission, ProjectPermission
+from .serializers import CommentSerializer, IssueSerializer, ProjectSerializer
+
+
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all().order_by('id')
+    queryset = Project.objects.all().order_by("id")
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated, ProjectPermission]
 
@@ -17,7 +20,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 
 class IssueViewSet(viewsets.ModelViewSet):
-    queryset = Issue.objects.all().order_by('id')
+    queryset = Issue.objects.all().order_by("id")
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated, IssuePermission]
 
@@ -26,19 +29,24 @@ class IssueViewSet(viewsets.ModelViewSet):
         author = self.request.user
 
         # 2. Vérifier si l'utilisateur assigné est un contributeur du projet concerné
-        assignee_id = self.request.data.get('assignee_user_id', None)
-        project_id = self.request.data.get('project_id')
-        
+        assignee_id = self.request.data.get("assignee_user_id", None)
+        project_id = self.request.data.get("project_id")
+
         if assignee_id:
-            is_contributor = Contributor.objects.filter(user_id=assignee_id, project_id=project_id).exists()
-            
+            is_contributor = Contributor.objects.filter(
+                user_id=assignee_id, project_id=project_id
+            ).exists()
+
             if not is_contributor:
-                raise PermissionDenied("L'utilisateur assigné doit être un contributeur du projet.")
+                raise PermissionDenied(
+                    "L'utilisateur assigné doit être un contributeur du projet."
+                )
 
         serializer.save(author_user_id=author)
 
+
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().order_by('id')
+    queryset = Comment.objects.all().order_by("id")
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, CommentPermission]
 
