@@ -15,7 +15,7 @@ class UserViewSet(viewsets.ModelViewSet):
         age = serializer.validated_data.get('age')
         if age is not None and int(age) < 15:
             return Response({'error': 'Un utilisateur de moins de 15 ans ne peut pas s\'inscrire.'}, status=400)
-        user = User(username=serializer.validated_data.get('username'), email=serializer.validated_data.get('email'), age=age)
+        user = User(username=serializer.validated_data.get('username'), email=serializer.validated_data.get('email'), age=age, can_be_contacted=serializer.validated_data.get('can_be_contacted', False), can_data_be_shared=serializer.validated_data.get('can_data_be_shared', False))
         user.set_password(serializer.validated_data.get('password'))  # Sets the password correctly
         user.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
