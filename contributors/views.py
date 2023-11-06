@@ -8,10 +8,13 @@ from .serializers import ContributorSerializer
 
 
 class ContributorViewSet(viewsets.ModelViewSet):
+    """Viewset for handling Contributor operations."""
+
     queryset = Contributor.objects.all().order_by("id")
     serializer_class = ContributorSerializer
 
     def perform_create(self, serializer):
+        """Create a Contributor, ensuring the requesting user is the project author."""
         project = self.request.data.get("project_id")
         if Project.objects.get(id=project).author_user_id == self.request.user:
             serializer.save()
@@ -21,6 +24,7 @@ class ContributorViewSet(viewsets.ModelViewSet):
             )
 
     def get_queryset(self):
+        """Retrieve the queryset of Contributors, possibly filtered by project_id."""
         queryset = Contributor.objects.all().order_by("id")
         project_id = self.request.query_params.get("project_id", None)
 

@@ -7,10 +7,12 @@ from .serializers import UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """ ViewSet for viewing and editing user instances."""
     queryset = User.objects.all().order_by("id")
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
+        """ Create a User instance after validating the age. Users under 15 cannot register."""
         serializer = self.get_serializer(data=request.data)  # Gets the serializer
         serializer.is_valid(raise_exception=True)  # Checks if the data is valid
 
@@ -37,6 +39,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["DELETE"], url_path="delete-account")
     def delete_account(self, request, pk=None):
+        """Deletes the user account and all associated data."""
         user = self.get_object()
-        user.delete()  # Supprime l'utilisateur et toutes ses données associées
+        user.delete()
         return Response({"status": "Compte supprimé"}, status=status.HTTP_200_OK)

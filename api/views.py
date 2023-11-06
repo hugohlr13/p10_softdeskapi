@@ -11,24 +11,27 @@ from .serializers import CommentSerializer, IssueSerializer, ProjectSerializer
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
+    """ViewSet for handling Project CRUD operations."""
+
     queryset = Project.objects.all().order_by("id")
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated, ProjectPermission]
 
     def perform_create(self, serializer):
+        """Save the project with the current user set as the author."""
         serializer.save(author_user_id=self.request.user)
 
 
 class IssueViewSet(viewsets.ModelViewSet):
+    """ViewSet for handling Issue CRUD operations."""
+
     queryset = Issue.objects.all().order_by("id")
     serializer_class = IssueSerializer
     permission_classes = [IsAuthenticated, IssuePermission]
 
     def perform_create(self, serializer):
-        # 1. Attribuer l'utilisateur courant en tant qu'auteur de l'issue
+        """Save the issue with the current user as the author and validate the assignee."""
         author = self.request.user
-
-        # 2. Vérifier si l'utilisateur assigné est un contributeur du projet concerné
         assignee_id = self.request.data.get("assignee_user_id", None)
         project_id = self.request.data.get("project_id")
 
@@ -46,9 +49,12 @@ class IssueViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """ViewSet for handling Comment CRUD operations."""
+
     queryset = Comment.objects.all().order_by("id")
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated, CommentPermission]
 
     def perform_create(self, serializer):
+        """Save the comment with the current user set as the author."""
         serializer.save(author_user_id=self.request.user)

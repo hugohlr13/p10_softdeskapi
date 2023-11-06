@@ -36,7 +36,7 @@ This API is designed to streamline project management within an enterprise by pr
 
 5. **Activate the virtual environment:**
     ```sh
-    source env/bin/activate  # On Windows, use `env\Scripts\activate`
+    source env/bin/activate  
     ```
 
 ### Running the Tests

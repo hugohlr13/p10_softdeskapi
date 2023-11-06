@@ -4,6 +4,11 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user instances, translating between queryset or instance and JSON representation.
+    Includes fields for identification, contact preferences, and age.
+    """
+
     class Meta:
         model = User
         fields = [
@@ -14,4 +19,4 @@ class UserSerializer(serializers.ModelSerializer):
             "age",
             "can_be_contacted",
             "can_data_be_shared",
-        ]  # Fields JSON
+        ]  # JSON fields to be included in the serializer

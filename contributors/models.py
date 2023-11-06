@@ -18,6 +18,7 @@ class Contributor(models.Model):
 
     @receiver(post_save, sender=Project)
     def create_author_contributor(sender, instance, created, **kwargs):
+        """Creates a contributor instance automatically when a new project is created."""
         if created:
             Contributor.objects.create(
                 user_id=instance.author_user_id, project_id=instance
