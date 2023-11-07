@@ -12,14 +12,14 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
-        """ Create a User instance after validating the age. Users under 15 cannot register."""
+        """ Create a User instance after validating the age. Users under 16 cannot register."""
         serializer = self.get_serializer(data=request.data)  # Gets the serializer
         serializer.is_valid(raise_exception=True)  # Checks if the data is valid
 
         age = serializer.validated_data.get("age")
-        if age is not None and int(age) < 15:
+        if age is not None and int(age) < 16:
             return Response(
-                {"error": "Un utilisateur de moins de 15 ans ne peut pas s'inscrire."},
+                {"error": "Un utilisateur de moins de 16 ans ne peut pas s'inscrire."},
                 status=400,
             )
         user = User(
