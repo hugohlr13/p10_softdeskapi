@@ -5,6 +5,7 @@ from api.models import Project
 
 from .models import Contributor
 from .serializers import ContributorSerializer
+from .permissions import IsAuthenticatedToViewContributors
 
 
 class ContributorViewSet(viewsets.ModelViewSet):
@@ -12,6 +13,7 @@ class ContributorViewSet(viewsets.ModelViewSet):
 
     queryset = Contributor.objects.all().order_by("id")
     serializer_class = ContributorSerializer
+    permission_classes = [IsAuthenticatedToViewContributors]
 
     def perform_create(self, serializer):
         """Create a Contributor, ensuring the requesting user is the project author."""
