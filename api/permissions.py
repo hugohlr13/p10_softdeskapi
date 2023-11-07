@@ -56,7 +56,7 @@ class IssuePermission(permissions.BasePermission):
         if request.method == "PATCH":
             if set(request.data.keys()) - {"status"}:
                 raise PermissionDenied(
-                    "Vous ne pouvez mettre à jour que le champ 'statut'."
+                    "Vous n'êtes pas assigné ou auteur de la tâche'."
                 )
             return True
 

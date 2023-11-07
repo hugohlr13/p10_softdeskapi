@@ -30,23 +30,25 @@ class IssueViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IssuePermission]
 
     def perform_create(self, serializer):
-        """Save the issue with the current user as the author and validate the assignee."""
+        """Save the issue with the current user as the author and validate the assignee and author."""
         author = self.request.user
-        assignee_id = self.request.data.get("assignee_user_id", None)
         project_id = self.request.data.get("project_id")
+        if not self._is_contributor(author, project_id):
+            raise PermissionDenied("Seuls les contributeurs du projet peuvent créer des problèmes.")
 
+        assignee_id = self.request.data.get("assignee_user_id", None)
         if assignee_id:
-            is_contributor = Contributor.objects.filter(
-                user_id=assignee_id, project_id=project_id
-            ).exists()
-
+            is_contributor = self._is_contributor(assignee_id, project_id)
             if not is_contributor:
-                raise PermissionDenied(
-                    "L'utilisateur assigné doit être un contributeur du projet."
-                )
+                raise PermissionDenied("L'utilisateur assigné doit être un contributeur du projet.")
 
         serializer.save(author_user_id=author)
 
+    def _is_contributor(self, user, project_id):
+        """Helper method to check if a user is a contributor of a project."""
+        return Contributor.objects.filter(
+            user_id=user.id, project_id=project_id
+        ).exists()
 
 class CommentViewSet(viewsets.ModelViewSet):
     """ViewSet for handling Comment CRUD operations."""
