@@ -33,14 +33,18 @@ class IssueViewSet(viewsets.ModelViewSet):
         """Save the issue with the current user as the author and validate the assignee and author."""
         author = self.request.user
         project_id = self.request.data.get("project_id")
-        if not self._is_contributor(author, project_id):
+        if not Contributor.objects.filter(user_id=author.id, project_id=project_id).exists():
             raise PermissionDenied("Seuls les contributeurs du projet peuvent créer des problèmes.")
 
         assignee_id = self.request.data.get("assignee_user_id", None)
         if assignee_id:
-            is_contributor = self._is_contributor(assignee_id, project_id)
+            is_contributor = Contributor.objects.filter(
+                user_id=assignee_id, project_id=project_id
+            ).exists()
             if not is_contributor:
-                raise PermissionDenied("L'utilisateur assigné doit être un contributeur du projet.")
+                raise PermissionDenied(
+                    "L'utilisateur assigné doit être un contributeur du projet."
+                )
 
         serializer.save(author_user_id=author)
 
