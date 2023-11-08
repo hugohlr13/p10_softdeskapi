@@ -42,9 +42,7 @@ class IssueViewSet(viewsets.ModelViewSet):
                 user_id=assignee_id, project_id=project_id
             ).exists()
             if not is_contributor:
-                raise PermissionDenied(
-                    "L'utilisateur assigné doit être un contributeur du projet."
-                )
+                raise PermissionDenied("L'utilisateur assigné doit être un contributeur du projet.")
 
         serializer.save(author_user_id=author)
 
